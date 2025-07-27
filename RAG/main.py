@@ -27,7 +27,7 @@ def call_groq_llm(prompt, model="llama3-70b-8192"):
 
 
 
-query = "What is the document about?"
+query = "what's the company's name and what service do they render?"
 context_chunks = get_top_k_chunks(query)
 context = "\n\n".join(context_chunks)
 
@@ -41,3 +41,5 @@ Question: {query}
 
 response = call_groq_llm(full_prompt)
 print(response)
+
+# print("\n\n\n",context_chunks)
