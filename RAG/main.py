@@ -27,9 +27,9 @@ def call_groq_llm(prompt, model="llama3-70b-8192"):
 
 
 
-query = "what's the company's name and what service do they render?"
+query = "what's the name of the student there, also what department?"
 context_chunks = get_top_k_chunks(query)
-context = "\n\n".join(context_chunks)
+context = "\n\n".join([chunk["text"] for chunk in context_chunks])
 
 full_prompt = f"""Based on the following document context, answer the user's question.
 

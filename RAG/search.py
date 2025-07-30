@@ -1,24 +1,35 @@
 from pydoc import text
-import faiss
+import faiss, pickle
 from sentence_transformers import SentenceTransformer
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pathlib import Path
 import warnings
-
 warnings.filterwarnings("ignore")
 
+# Load the index
+model = SentenceTransformer("all-MiniLM-L6-v2")
+index = faiss.read_index("my_index.faiss")
+with open("chunks.pkl", "rb") as f:
+    chunks = pickle.load(f)
+
 def get_top_k_chunks(query, k=3):
-    text = Path("mydoc.txt").read_text(encoding="utf-8", errors="replace")
-    # chunks = [text[i:i+500] for i in range(0, len(text), 500)]
-    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
-    docs = splitter.split_text(text)
+    """Search FAISS index for top-k most relevant chunks."""
+    # Encode the query into vector space
+    query_vec = model.encode([query])
+    
+    # Search in FAISS
+    distances, indices = index.search(query_vec, k)
+    
+    results = []
+    for rank, (dist, idx) in enumerate(zip(distances[0], indices[0]), start=1):
+        results.append({
+            "rank": rank,
+            "score": float(dist),  # Lower score = more similar for L2
+            "text": chunks[idx]
+        })
+    
+    return results
 
-    index = faiss.read_index("my_index.faiss")
-    model = SentenceTransformer('all-MiniLM-L6-v2')
-    embeddings = model.encode(docs)
-    q_embedding = model.encode([query])
-    D, I = index.search(q_embedding, k)
-    return [docs[i] for i in I[0]]
 
 
-# print(get_top_k_chunks("What service does the company render?", k=3))
+# print(get_top_k_chunks("What's this file about?", k=3))
