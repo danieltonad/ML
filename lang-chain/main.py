@@ -1,8 +1,9 @@
 from langchain.llms.openai import OpenAI
 import streamlit as st
+from config import config
 
 
-st.title("LangChain with Streamlit")
+st.title("Celebrity Search Results")
 input_text = st.text_input("Search the topic u want;")
 
 
